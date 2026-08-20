@@ -373,7 +373,6 @@
     </div>
 
     <script>
-        // ⚠️ 아래에 본인의 구글 앱스크립트 배포 URL을 넣어주세요.
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzTg0sTWlfePvySzbNwIN-BQn1s3ndpFq620XgapiW3gq3fHGsUlPnOlIV7H5ADdzB1/exec"; 
 
         let items = []; 
@@ -383,21 +382,30 @@
         async function fetchItems() {
             try {
                 bookshelf.innerHTML = '<div class="loading">보도자료 목록을 가져오는 중입니다...</div>';
-                const response = await fetch(WEB_APP_URL);
+                const response = await fetch(WEB_APP_URL, { redirect: "follow" });
                 if (!response.ok) throw new Error('네트워크 응답 오류');
-                items = await response.json();
+                
+                let rawData = await response.json();
+                
+                // 📌 개봉일자(releaseDate) 기준 최신순(내림차순) 정렬
+                items = rawData.sort((a, b) => {
+                    const dateA = a.releaseDate ? new Date(a.releaseDate) : new Date(0);
+                    const dateB = b.releaseDate ? new Date(b.releaseDate) : new Date(0);
+                    return dateB - dateA; // 최신날짜가 맨 앞으로
+                });
+
                 renderItems(items);
             } catch (error) {
                 console.error("데이터 가져오기 실패:", error);
-                bookshelf.innerHTML = '<div class="loading" style="color:#b33b3b;">목록을 불러오지 못했습니다.<br>API 주소를 확인해주세요.</div>';
+                bookshelf.innerHTML = '<div class="loading" style="color:#b33b3b;">목록을 불러오지 못했습니다.<br>API 주소 및 앱 스크립트 배포 권한을 확인해주세요.</div>';
             }
         }
 
         function renderItems(dataList) {
             bookshelf.innerHTML = '';
 
-            dataList.forEach((item) => {
-                const colorIndex = (item.rowIndex || 0) % 4;
+            dataList.forEach((item, index) => {
+                const colorIndex = index % 4;
                 const colorClass = `color-${colorIndex}`;
 
                 const wrapper = document.createElement('div');
@@ -411,7 +419,7 @@
                                 <div class="book-subtitle">개봉일: ${item.releaseDate || '미정'}</div>
                             </div>
                             <div class="book-footer">
-                                <div class="book-meta">${item.createdAt ? item.createdAt.substring(0, 10) : ''}</div>
+                                <div class="book-meta">${item.createdAt ? String(item.createdAt).substring(0, 10) : ''}</div>
                                 <button class="btn-edit" onclick="openEditModal(event, ${item.rowIndex})" title="수정">✏️</button>
                             </div>
                         </div>
@@ -458,7 +466,7 @@
             event.stopPropagation(); 
             event.preventDefault();
 
-            const item = items.find(n => n.rowIndex === rowIndex);
+            const item = items.find(n => Number(n.rowIndex) === Number(rowIndex));
             if (!item) return;
 
             document.getElementById('modalTitle').innerText = '프레스킷 정보 수정';
@@ -512,7 +520,9 @@
             try {
                 const response = await fetch(WEB_APP_URL, {
                     method: 'POST',
-                    body: JSON.stringify(payload)
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload),
+                    redirect: "follow"
                 });
                 const resData = await response.json();
                 if (resData.result === 'success') {
@@ -537,10 +547,12 @@
                 try {
                     const response = await fetch(WEB_APP_URL, {
                         method: 'POST',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                         body: JSON.stringify({
                             action: "delete",
                             rowIndex: rowIndex
-                        })
+                        }),
+                        redirect: "follow"
                     });
                     const resData = await response.json();
                     if (resData.result === 'success') {

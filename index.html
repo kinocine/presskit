@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Press Kit Room</title>
+
+    <!-- 📌 파비콘 -->
+    <link rel="icon" type="image/x-icon" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgvQX2i_Mvoy-GMc0P09YSaLzeCwOvmCcgOFjAADQmEOtFxtK7FM63RPo0_PMGNuxDKSfijZmJrLPDaVfHtuxinPD4XYuhXmXCij0FRR_gpsMlWZ1eyZZL0t2CKH3cUCgkXCEg_P4oYMfcTERkHob0DSIYg2PrdtMA8GAweiRQ1EAsvkq6RKjSLNdQra7I2/s320/20260721_145044.png">
+    <link rel="apple-touch-icon" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgvQX2i_Mvoy-GMc0P09YSaLzeCwOvmCcgOFjAADQmEOtFxtK7FM63RPo0_PMGNuxDKSfijZmJrLPDaVfHtuxinPD4XYuhXmXCij0FRR_gpsMlWZ1eyZZL0t2CKH3cUCgkXCEg_P4oYMfcTERkHob0DSIYg2PrdtMA8GAweiRQ1EAsvkq6RKjSLNdQra7I2/s320/20260721_145044.png">
+
+    <style>
+        body {
+            background-color: #f7f5f0;
+            color: #4a3e3d;
+            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+            margin: 0;
+            padding: 20px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Title Area */
+        .title-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 10px;
+            margin-bottom: 15px;
+        }
+
+        .title-logo {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+        }
+
+        h1 {
+            font-family: 'Georgia', serif;
+            font-size: 2rem;
+            margin: 0;
+            color: #8c6239;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        /* Search Area */
+        .search-container {
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 25px;
+            padding: 0 10px;
+            box-sizing: border-box;
+        }
+
+        .search-input {
+            width: 100%;
+            background: #ffffff;
+            border: 1px solid #d1c7bd;
+            border-radius: 20px;
+            padding: 10px 18px;
+            color: #4a3e3d;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .search-input:focus {
+            border-color: #b8936e;
+            box-shadow: 0 0 8px rgba(184, 147, 110, 0.3);
+        }
+
+        /* Bookshelf / Grid Layout */
+        .bookshelf {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            max-width: 900px;
+            width: 100%;
+            padding: 20px 12px;
+            border-bottom: 14px solid #c2a689;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+            background: #fdfbf7;
+            border-radius: 8px;
+            border: 1px solid #eadecc;
+            box-sizing: border-box;
+        }
+
+        .book-wrapper {
+            position: relative;
+            perspective: 800px;
+            width: 100%;
+        }
+
+        .book-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .book {
+            border-left: 6px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 2px 4px 8px rgba(0,0,0,0.12), 
+                        inset 1px 1px 0px rgba(255,255,255,0.2);
+            border-radius: 2px 5px 5px 2px;
+            height: 140px; 
+            padding: 10px 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-sizing: border-box;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+        }
+
+        .book-wrapper:hover .book {
+            transform: rotateY(-8deg) translateZ(5px);
+            box-shadow: 5px 8px 15px rgba(0,0,0,0.18);
+        }
+
+        /* Card Color Schemes */
+        .color-0 { background: linear-gradient(135deg, #7b9acc 0%, #5e7fa8 100%); }
+        .color-1 { background: linear-gradient(135deg, #a7c796 0%, #85a673 100%); }
+        .color-2 { background: linear-gradient(135deg, #df9898 0%, #bd7373 100%); }
+        .color-3 { background: linear-gradient(135deg, #d9b48f 0%, #b8936e 100%); }
+
+        .book-title {
+            font-size: 0.8rem;
+            font-weight: bold;
+            line-height: 1.3;
+            color: #ffffff;
+            word-break: break-all;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 4px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+        }
+
+        .book-subtitle {
+            font-size: 0.65rem;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.2;
+            text-shadow: 0 1px 1px rgba(0,0,0,0.1);
+        }
+
+        .book-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-top: 1px dashed rgba(255, 255, 255, 0.25);
+            padding-top: 5px;
+            margin-top: 4px;
+        }
+
+        .book-meta {
+            font-size: 0.55rem;
+            color: rgba(255, 255, 255, 0.9);
+            white-space: nowrap;
+        }
+
+        .btn-edit {
+            background: rgba(255, 255, 255, 0.25);
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            font-size: 0.55rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+            box-sizing: border-box;
+            padding: 0;
+        }
+
+        .btn-edit:hover {
+            background: rgba(255, 255, 255, 0.45);
+        }
+
+        /* Add Card Style */
+        .add-card {
+            border: 2px dashed #c2a689;
+            border-radius: 5px;
+            height: 140px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.3s, border-color 0.3s;
+            color: #a88d74;
+            box-sizing: border-box;
+            background: #ffffff;
+        }
+
+        .add-card:hover {
+            background: #fdfaf5;
+            border-color: #b8936e;
+            color: #b8936e;
+        }
+
+        .add-icon {
+            font-size: 2rem;
+            margin-bottom: 5px;
+            font-weight: 300;
+        }
+
+        .add-text {
+            font-size: 0.7rem;
+        }
+
+        /* Modal Area */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(40, 35, 30, 0.4);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            backdrop-filter: blur(2px);
+        }
+
+        .modal-content {
+            background: #ffffff;
+            border: 1px solid #e5dec9;
+            border-radius: 12px;
+            padding: 24px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            box-sizing: border-box;
+        }
+
+        .modal-title {
+            font-size: 1.15rem;
+            color: #8c6239;
+            margin-top: 0;
+            margin-bottom: 18px;
+            border-bottom: 1px solid #eeeada;
+            padding-bottom: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            color: #706259;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input {
+            width: 100%;
+            background: #faf9f5;
+            border: 1px solid #dcd5c9;
+            color: #4a3e3d;
+            padding: 9px;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 0.9rem;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #b8936e;
+            background: #ffffff;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 22px;
+        }
+
+        .btn {
+            padding: 9px 18px;
+            border-radius: 6px;
+            border: none;
+            font-size: 0.85rem;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-primary { background: #b8936e; color: #fff; }
+        .btn-primary:hover { background: #a37f59; }
+        .btn-secondary { background: #eadecc; color: #5c4f46; }
+        .btn-secondary:hover { background: #dccbb5; }
+        .btn-danger { background: #c94c4c; color: #fff; }
+        .btn-danger:hover { background: #b33b3b; }
+
+        .loading {
+            grid-column: span 3;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #a37f59;
+            padding: 30px 0;
+        }
+
+        @media (min-width: 600px) {
+            .title-container { gap: 16px; }
+            .title-logo { width: 48px; height: 48px; }
+            .book { height: 180px; padding: 15px 12px; }
+            .book-title { font-size: 0.95rem; }
+            .book-subtitle { font-size: 0.75rem; }
+            .book-meta { font-size: 0.65rem; }
+            .btn-edit { width: 20px; height: 20px; font-size: 0.65rem; }
+            .add-card { height: 180px; }
+            .add-icon { font-size: 2.5rem; }
+            .add-text { font-size: 0.85rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Title -->
+    <div class="title-container">
+        <img class="title-logo" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgvQX2i_Mvoy-GMc0P09YSaLzeCwOvmCcgOFjAADQmEOtFxtK7FM63RPo0_PMGNuxDKSfijZmJrLPDaVfHtuxinPD4XYuhXmXCij0FRR_gpsMlWZ1eyZZL0t2CKH3cUCgkXCEg_P4oYMfcTERkHob0DSIYg2PrdtMA8GAweiRQ1EAsvkq6RKjSLNdQra7I2/s320/20260721_145044.png" alt="Press Kit Icon">
+        <h1>Press Kit Room</h1>
+    </div>
+    
+    <!-- Search Bar -->
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-input" placeholder="영화/작품 제목 검색..." oninput="filterBooks()">
+    </div>
+
+    <!-- Main List Shelf -->
+    <div class="bookshelf" id="bookshelf">
+        <div class="loading">보도자료 목록을 가져오는 중입니다...</div>
+    </div>
+
+    <!-- Modal Form -->
+    <div class="modal-overlay" id="modal">
+        <div class="modal-content">
+            <h3 class="modal-title" id="modalTitle">새 프레스킷 등록</h3>
+            <input type="hidden" id="editRowIndex" value="">
+            
+            <div class="form-group">
+                <label for="bookTitle">제목</label>
+                <input type="text" id="bookTitle" placeholder="작품/영화 제목을 입력하세요" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="releaseDate">개봉일</label>
+                <input type="date" id="releaseDate" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="bookUrl">보도자료 URL</label>
+                <input type="url" id="bookUrl" placeholder="https://..." required>
+            </div>
+
+            <div class="modal-actions">
+                <div>
+                    <button class="btn btn-danger" id="btnDelete" onclick="deleteBook()" style="display: none;">삭제</button>
+                </div>
+                <div>
+                    <button class="btn btn-secondary" onclick="closeModal()">취소</button>
+                    <button class="btn btn-primary" id="btnSave" onclick="saveBook()">저장</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ⚠️ 아래에 본인의 구글 앱스크립트 배포 URL을 넣어주세요.
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzTg0sTWlfePvySzbNwIN-BQn1s3ndpFq620XgapiW3gq3fHGsUlPnOlIV7H5ADdzB1/exec"; 
+
+        let items = []; 
+        const bookshelf = document.getElementById('bookshelf');
+        const modal = document.getElementById('modal');
+
+        async function fetchItems() {
+            try {
+                bookshelf.innerHTML = '<div class="loading">보도자료 목록을 가져오는 중입니다...</div>';
+                const response = await fetch(WEB_APP_URL);
+                if (!response.ok) throw new Error('네트워크 응답 오류');
+                items = await response.json();
+                renderItems(items);
+            } catch (error) {
+                console.error("데이터 가져오기 실패:", error);
+                bookshelf.innerHTML = '<div class="loading" style="color:#b33b3b;">목록을 불러오지 못했습니다.<br>API 주소를 확인해주세요.</div>';
+            }
+        }
+
+        function renderItems(dataList) {
+            bookshelf.innerHTML = '';
+
+            dataList.forEach((item) => {
+                const colorIndex = (item.rowIndex || 0) % 4;
+                const colorClass = `color-${colorIndex}`;
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'book-wrapper';
+                
+                wrapper.innerHTML = `
+                    <a href="${item.url}" target="_blank" class="book-link">
+                        <div class="book ${colorClass}">
+                            <div>
+                                <div class="book-title">${item.title}</div>
+                                <div class="book-subtitle">개봉일: ${item.releaseDate || '미정'}</div>
+                            </div>
+                            <div class="book-footer">
+                                <div class="book-meta">${item.createdAt ? item.createdAt.substring(0, 10) : ''}</div>
+                                <button class="btn-edit" onclick="openEditModal(event, ${item.rowIndex})" title="수정">✏️</button>
+                            </div>
+                        </div>
+                    </a>
+                `;
+                bookshelf.appendChild(wrapper);
+            });
+
+            // 추가 버튼
+            const addCard = document.createElement('div');
+            addCard.className = 'add-card';
+            addCard.onclick = () => openAddModal();
+            addCard.innerHTML = `
+                <span class="add-icon">+</span>
+                <span class="add-text">프레스킷 등록</span>
+            `;
+            bookshelf.appendChild(addCard);
+        }
+
+        function filterBooks() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            if (!query) {
+                renderItems(items);
+                return;
+            }
+            const filtered = items.filter(item => 
+                (item.title && item.title.toLowerCase().includes(query)) || 
+                (item.releaseDate && item.releaseDate.includes(query))
+            );
+            renderItems(filtered);
+        }
+
+        function openAddModal() {
+            document.getElementById('modalTitle').innerText = '새 프레스킷 등록';
+            document.getElementById('editRowIndex').value = '';
+            document.getElementById('bookTitle').value = '';
+            document.getElementById('releaseDate').value = '';
+            document.getElementById('bookUrl').value = '';
+            document.getElementById('btnDelete').style.display = 'none';
+            modal.style.display = 'flex';
+        }
+
+        function openEditModal(event, rowIndex) {
+            event.stopPropagation(); 
+            event.preventDefault();
+
+            const item = items.find(n => n.rowIndex === rowIndex);
+            if (!item) return;
+
+            document.getElementById('modalTitle').innerText = '프레스킷 정보 수정';
+            document.getElementById('editRowIndex').value = rowIndex;
+            document.getElementById('bookTitle').value = item.title;
+            document.getElementById('releaseDate').value = item.releaseDate || '';
+            document.getElementById('bookUrl').value = item.url;
+            document.getElementById('btnDelete').style.display = 'inline-block';
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            modal.style.display = 'none';
+        }
+
+        async function saveBook() {
+            const rowIndex = document.getElementById('editRowIndex').value;
+            const title = document.getElementById('bookTitle').value.trim();
+            const releaseDate = document.getElementById('releaseDate').value;
+            const url = document.getElementById('bookUrl').value.trim();
+
+            if (!title || !url) {
+                alert('제목과 URL은 필수 입력 항목입니다.');
+                return;
+            }
+
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            const formattedDate = `${yyyy}-${mm}-${dd}`;
+
+            const btnSave = document.getElementById('btnSave');
+            btnSave.innerText = "저장 중...";
+            btnSave.disabled = true;
+
+            const payload = {
+                title,
+                releaseDate,
+                url,
+                createdAt: formattedDate
+            };
+
+            if (rowIndex === '') {
+                payload.action = "create";
+            } else {
+                payload.action = "update";
+                payload.rowIndex = rowIndex;
+            }
+
+            try {
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                });
+                const resData = await response.json();
+                if (resData.result === 'success') {
+                    alert('저장되었습니다.');
+                    closeModal();
+                    fetchItems(); 
+                } else {
+                    alert('저장에 실패했습니다: ' + resData.message);
+                }
+            } catch (error) {
+                console.error("저장 통신 에러:", error);
+                alert('구글 시트 연동 중 에러가 발생했습니다.');
+            } finally {
+                btnSave.innerText = "저장";
+                btnSave.disabled = false;
+            }
+        }
+
+        async function deleteBook() {
+            const rowIndex = document.getElementById('editRowIndex').value;
+            if (rowIndex !== '' && confirm('이 항목을 삭제하시겠습니까?')) {
+                try {
+                    const response = await fetch(WEB_APP_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            action: "delete",
+                            rowIndex: rowIndex
+                        })
+                    });
+                    const resData = await response.json();
+                    if (resData.result === 'success') {
+                        alert('삭제되었습니다.');
+                        closeModal();
+                        fetchItems();
+                    } else {
+                        alert('삭제 실패: ' + resData.message);
+                    }
+                } catch (error) {
+                    console.error("삭제 에러:", error);
+                    alert('통신 오류가 발생했습니다.');
+                }
+            }
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        fetchItems();
+    </script>
+</body>
+</html>

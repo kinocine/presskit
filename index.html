@@ -45,17 +45,45 @@
             text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
 
-        /* Search Area */
+        /* Action & Search Bar Area */
         .search-container {
             width: 100%;
             max-width: 600px;
             margin-bottom: 25px;
             padding: 0 10px;
             box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-add-top {
+            background: #b8936e;
+            color: #ffffff;
+            border: 1px solid #a37f59;
+            border-radius: 20px;
+            padding: 10px 16px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .btn-add-top:hover {
+            background: #a37f59;
+        }
+
+        .btn-add-top:active {
+            transform: scale(0.97);
         }
 
         .search-input {
-            width: 100%;
+            flex: 1;
             background: #ffffff;
             border: 1px solid #d1c7bd;
             border-radius: 20px;
@@ -163,6 +191,31 @@
             white-space: nowrap;
         }
 
+        .book-actions {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .sub-link-icon {
+            text-decoration: none;
+            background: rgba(255, 255, 255, 0.25);
+            color: #ffffff;
+            border-radius: 4px;
+            width: 18px;
+            height: 18px;
+            font-size: 0.6rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .sub-link-icon:hover {
+            background: rgba(255, 255, 255, 0.5);
+            transform: scale(1.1);
+        }
+
         .btn-edit {
             background: rgba(255, 255, 255, 0.25);
             color: #ffffff;
@@ -184,38 +237,6 @@
             background: rgba(255, 255, 255, 0.45);
         }
 
-        /* Add Card Style */
-        .add-card {
-            border: 2px dashed #c2a689;
-            border-radius: 5px;
-            height: 140px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: background 0.3s, border-color 0.3s;
-            color: #a88d74;
-            box-sizing: border-box;
-            background: #ffffff;
-        }
-
-        .add-card:hover {
-            background: #fdfaf5;
-            border-color: #b8936e;
-            color: #b8936e;
-        }
-
-        .add-icon {
-            font-size: 2rem;
-            margin-bottom: 5px;
-            font-weight: 300;
-        }
-
-        .add-text {
-            font-size: 0.7rem;
-        }
-
         /* Modal Area */
         .modal-overlay {
             position: fixed;
@@ -234,9 +255,11 @@
             border-radius: 12px;
             padding: 24px;
             width: 90%;
-            max-width: 400px;
+            max-width: 440px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             box-sizing: border-box;
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         .modal-title {
@@ -314,10 +337,7 @@
             .book-title { font-size: 0.95rem; }
             .book-subtitle { font-size: 0.75rem; }
             .book-meta { font-size: 0.65rem; }
-            .btn-edit { width: 20px; height: 20px; font-size: 0.65rem; }
-            .add-card { height: 180px; }
-            .add-icon { font-size: 2.5rem; }
-            .add-text { font-size: 0.85rem; }
+            .btn-edit, .sub-link-icon { width: 22px; height: 22px; font-size: 0.7rem; }
         }
     </style>
 </head>
@@ -329,8 +349,9 @@
         <h1>Press Kit Room</h1>
     </div>
     
-    <!-- Search Bar -->
+    <!-- Top Action Bar (Add Button + Search Bar) -->
     <div class="search-container">
+        <button class="btn-add-top" onclick="openAddModal()" title="새 프레스킷 등록">＋ 등록</button>
         <input type="text" id="searchInput" class="search-input" placeholder="영화/작품 제목 검색..." oninput="filterBooks()">
     </div>
 
@@ -346,18 +367,28 @@
             <input type="hidden" id="editRowIndex" value="">
             
             <div class="form-group">
-                <label for="bookTitle">제목</label>
+                <label for="bookTitle">제목 (필수)</label>
                 <input type="text" id="bookTitle" placeholder="작품/영화 제목을 입력하세요" required>
             </div>
             
             <div class="form-group">
                 <label for="releaseDate">개봉일</label>
-                <input type="date" id="releaseDate" required>
+                <input type="date" id="releaseDate">
             </div>
             
             <div class="form-group">
-                <label for="bookUrl">보도자료 URL</label>
+                <label for="bookUrl">보도자료 URL 1 (기본, 필수)</label>
                 <input type="url" id="bookUrl" placeholder="https://..." required>
+            </div>
+
+            <div class="form-group">
+                <label for="bookUrl2">보도자료 URL 2 (선택)</label>
+                <input type="url" id="bookUrl2" placeholder="추가 링크 (선택사항)">
+            </div>
+
+            <div class="form-group">
+                <label for="bookUrl3">보도자료 URL 3 (선택)</label>
+                <input type="url" id="bookUrl3" placeholder="추가 링크 (선택사항)">
             </div>
 
             <div class="modal-actions">
@@ -391,7 +422,7 @@
                 items = rawData.sort((a, b) => {
                     const dateA = a.releaseDate ? new Date(a.releaseDate) : new Date(0);
                     const dateB = b.releaseDate ? new Date(b.releaseDate) : new Date(0);
-                    return dateB - dateA; // 최신날짜가 맨 앞으로
+                    return dateB - dateA;
                 });
 
                 renderItems(items);
@@ -408,6 +439,15 @@
                 const colorIndex = index % 4;
                 const colorClass = `color-${colorIndex}`;
 
+                // 추가 URL 아이콘 생성
+                let extraLinksHtml = '';
+                if (item.url2 && item.url2.trim() !== '') {
+                    extraLinksHtml += `<a href="${item.url2}" target="_blank" class="sub-link-icon" onclick="event.stopPropagation();" title="보도자료 추가링크 1">🔗</a>`;
+                }
+                if (item.url3 && item.url3.trim() !== '') {
+                    extraLinksHtml += `<a href="${item.url3}" target="_blank" class="sub-link-icon" onclick="event.stopPropagation();" title="보도자료 추가링크 2">📎</a>`;
+                }
+
                 const wrapper = document.createElement('div');
                 wrapper.className = 'book-wrapper';
                 
@@ -420,23 +460,16 @@
                             </div>
                             <div class="book-footer">
                                 <div class="book-meta">${item.createdAt ? String(item.createdAt).substring(0, 10) : ''}</div>
-                                <button class="btn-edit" onclick="openEditModal(event, ${item.rowIndex})" title="수정">✏️</button>
+                                <div class="book-actions">
+                                    ${extraLinksHtml}
+                                    <button class="btn-edit" onclick="openEditModal(event, ${item.rowIndex})" title="수정">✏️</button>
+                                </div>
                             </div>
                         </div>
                     </a>
                 `;
                 bookshelf.appendChild(wrapper);
             });
-
-            // 추가 버튼
-            const addCard = document.createElement('div');
-            addCard.className = 'add-card';
-            addCard.onclick = () => openAddModal();
-            addCard.innerHTML = `
-                <span class="add-icon">+</span>
-                <span class="add-text">프레스킷 등록</span>
-            `;
-            bookshelf.appendChild(addCard);
         }
 
         function filterBooks() {
@@ -458,6 +491,8 @@
             document.getElementById('bookTitle').value = '';
             document.getElementById('releaseDate').value = '';
             document.getElementById('bookUrl').value = '';
+            document.getElementById('bookUrl2').value = '';
+            document.getElementById('bookUrl3').value = '';
             document.getElementById('btnDelete').style.display = 'none';
             modal.style.display = 'flex';
         }
@@ -473,7 +508,9 @@
             document.getElementById('editRowIndex').value = rowIndex;
             document.getElementById('bookTitle').value = item.title;
             document.getElementById('releaseDate').value = item.releaseDate || '';
-            document.getElementById('bookUrl').value = item.url;
+            document.getElementById('bookUrl').value = item.url || '';
+            document.getElementById('bookUrl2').value = item.url2 || '';
+            document.getElementById('bookUrl3').value = item.url3 || '';
             document.getElementById('btnDelete').style.display = 'inline-block';
             modal.style.display = 'flex';
         }
@@ -487,9 +524,11 @@
             const title = document.getElementById('bookTitle').value.trim();
             const releaseDate = document.getElementById('releaseDate').value;
             const url = document.getElementById('bookUrl').value.trim();
+            const url2 = document.getElementById('bookUrl2').value.trim();
+            const url3 = document.getElementById('bookUrl3').value.trim();
 
             if (!title || !url) {
-                alert('제목과 URL은 필수 입력 항목입니다.');
+                alert('제목과 기본 보도자료 URL은 필수 입력 항목입니다.');
                 return;
             }
 
@@ -507,6 +546,8 @@
                 title,
                 releaseDate,
                 url,
+                url2,
+                url3,
                 createdAt: formattedDate
             };
 

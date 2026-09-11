@@ -197,6 +197,7 @@
             gap: 4px;
         }
 
+        /* 추가 링크 버튼 스타일 */
         .sub-link-icon {
             text-decoration: none;
             background: rgba(255, 255, 255, 0.25);
@@ -204,16 +205,17 @@
             border-radius: 4px;
             width: 18px;
             height: 18px;
-            font-size: 0.6rem;
+            font-size: 0.65rem;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             transition: background 0.2s, transform 0.1s;
+            cursor: pointer;
         }
 
         .sub-link-icon:hover {
-            background: rgba(255, 255, 255, 0.5);
-            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.55);
+            transform: scale(1.15);
         }
 
         .btn-edit {
@@ -228,13 +230,14 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: background 0.2s;
+            transition: background 0.2s, transform 0.1s;
             box-sizing: border-box;
             padding: 0;
         }
 
         .btn-edit:hover {
             background: rgba(255, 255, 255, 0.45);
+            transform: scale(1.15);
         }
 
         /* Modal Area */
@@ -337,7 +340,7 @@
             .book-title { font-size: 0.95rem; }
             .book-subtitle { font-size: 0.75rem; }
             .book-meta { font-size: 0.65rem; }
-            .btn-edit, .sub-link-icon { width: 22px; height: 22px; font-size: 0.7rem; }
+            .btn-edit, .sub-link-icon { width: 22px; height: 22px; font-size: 0.75rem; }
         }
     </style>
 </head>
@@ -349,7 +352,7 @@
         <h1>Press Kit Room</h1>
     </div>
     
-    <!-- Top Action Bar (Add Button + Search Bar) -->
+    <!-- Top Action Bar -->
     <div class="search-container">
         <button class="btn-add-top" onclick="openAddModal()" title="새 프레스킷 등록">＋ 등록</button>
         <input type="text" id="searchInput" class="search-input" placeholder="영화/작품 제목 검색..." oninput="filterBooks()">
@@ -377,18 +380,18 @@
             </div>
             
             <div class="form-group">
-                <label for="bookUrl">보도자료 URL 1 (기본, 필수)</label>
+                <label for="bookUrl">보도자료 메인 URL (카드 클릭 이동, 필수)</label>
                 <input type="url" id="bookUrl" placeholder="https://..." required>
             </div>
 
             <div class="form-group">
-                <label for="bookUrl2">보도자료 URL 2 (선택)</label>
-                <input type="url" id="bookUrl2" placeholder="추가 링크 (선택사항)">
+                <label for="bookUrl2">추가 링크 1 (🔗 아이콘 생성)</label>
+                <input type="url" id="bookUrl2" placeholder="https://...">
             </div>
 
             <div class="form-group">
-                <label for="bookUrl3">보도자료 URL 3 (선택)</label>
-                <input type="url" id="bookUrl3" placeholder="추가 링크 (선택사항)">
+                <label for="bookUrl3">추가 링크 2 (📎 아이콘 생성)</label>
+                <input type="url" id="bookUrl3" placeholder="https://...">
             </div>
 
             <div class="modal-actions">
@@ -410,6 +413,14 @@
         const bookshelf = document.getElementById('bookshelf');
         const modal = document.getElementById('modal');
 
+        // URL 유효성 검사 헬퍼 함수
+        function getValidUrl(val) {
+            if (!val) return null;
+            const str = String(val).trim();
+            if (str === '' || str.toLowerCase() === 'undefined' || str.toLowerCase() === 'null') return null;
+            return str;
+        }
+
         async function fetchItems() {
             try {
                 bookshelf.innerHTML = '<div class="loading">보도자료 목록을 가져오는 중입니다...</div>';
@@ -418,7 +429,7 @@
                 
                 let rawData = await response.json();
                 
-                // 📌 개봉일자(releaseDate) 기준 최신순(내림차순) 정렬
+                // 최신순 정렬
                 items = rawData.sort((a, b) => {
                     const dateA = a.releaseDate ? new Date(a.releaseDate) : new Date(0);
                     const dateB = b.releaseDate ? new Date(b.releaseDate) : new Date(0);
@@ -439,23 +450,29 @@
                 const colorIndex = index % 4;
                 const colorClass = `color-${colorIndex}`;
 
-                // 추가 URL 아이콘 생성
+                // 메인 URL (카드 전체 클릭용)
+                const mainUrl = getValidUrl(item.url || item.bookUrl || item['보도자료URL'] || '#');
+
+                // 추가 URL 1 & 2 (하단 아이콘 버튼용)
+                const url2 = getValidUrl(item.url2 || item.bookUrl2 || item['보도자료URL2']);
+                const url3 = getValidUrl(item.url3 || item.bookUrl3 || item['보도자료URL3']);
+
                 let extraLinksHtml = '';
-                if (item.url2 && item.url2.trim() !== '') {
-                    extraLinksHtml += `<a href="${item.url2}" target="_blank" class="sub-link-icon" onclick="event.stopPropagation();" title="보도자료 추가링크 1">🔗</a>`;
+                if (url2) {
+                    extraLinksHtml += `<a href="${url2}" target="_blank" rel="noopener noreferrer" class="sub-link-icon" onclick="event.stopPropagation();" title="추가 링크 1 바로가기">🔗</a>`;
                 }
-                if (item.url3 && item.url3.trim() !== '') {
-                    extraLinksHtml += `<a href="${item.url3}" target="_blank" class="sub-link-icon" onclick="event.stopPropagation();" title="보도자료 추가링크 2">📎</a>`;
+                if (url3) {
+                    extraLinksHtml += `<a href="${url3}" target="_blank" rel="noopener noreferrer" class="sub-link-icon" onclick="event.stopPropagation();" title="추가 링크 2 바로가기">📎</a>`;
                 }
 
                 const wrapper = document.createElement('div');
                 wrapper.className = 'book-wrapper';
                 
                 wrapper.innerHTML = `
-                    <a href="${item.url}" target="_blank" class="book-link">
+                    <a href="${mainUrl}" target="_blank" rel="noopener noreferrer" class="book-link">
                         <div class="book ${colorClass}">
                             <div>
-                                <div class="book-title">${item.title}</div>
+                                <div class="book-title">${item.title || ''}</div>
                                 <div class="book-subtitle">개봉일: ${item.releaseDate || '미정'}</div>
                             </div>
                             <div class="book-footer">
@@ -506,11 +523,11 @@
 
             document.getElementById('modalTitle').innerText = '프레스킷 정보 수정';
             document.getElementById('editRowIndex').value = rowIndex;
-            document.getElementById('bookTitle').value = item.title;
+            document.getElementById('bookTitle').value = item.title || '';
             document.getElementById('releaseDate').value = item.releaseDate || '';
-            document.getElementById('bookUrl').value = item.url || '';
-            document.getElementById('bookUrl2').value = item.url2 || '';
-            document.getElementById('bookUrl3').value = item.url3 || '';
+            document.getElementById('bookUrl').value = item.url || item.bookUrl || item['보도자료URL'] || '';
+            document.getElementById('bookUrl2').value = item.url2 || item.bookUrl2 || item['보도자료URL2'] || '';
+            document.getElementById('bookUrl3').value = item.url3 || item.bookUrl3 || item['보도자료URL3'] || '';
             document.getElementById('btnDelete').style.display = 'inline-block';
             modal.style.display = 'flex';
         }

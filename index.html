@@ -197,7 +197,6 @@
             gap: 4px;
         }
 
-        /* 추가 링크 버튼 스타일 */
         .sub-link-icon {
             text-decoration: none;
             background: rgba(255, 255, 255, 0.25);
@@ -421,6 +420,16 @@
             return str;
         }
 
+        // 📌 날짜 뒤의 불필요한 ISO 시간 규격(T15:00:00.000Z 등) 제거 헬퍼
+        function formatDateOnly(val) {
+            if (!val) return '미정';
+            const str = String(val).trim();
+            if (str.includes('T')) {
+                return str.split('T')[0];
+            }
+            return str.substring(0, 10);
+        }
+
         async function fetchItems() {
             try {
                 bookshelf.innerHTML = '<div class="loading">보도자료 목록을 가져오는 중입니다...</div>';
@@ -473,10 +482,10 @@
                         <div class="book ${colorClass}">
                             <div>
                                 <div class="book-title">${item.title || ''}</div>
-                                <div class="book-subtitle">개봉일: ${item.releaseDate || '미정'}</div>
+                                <div class="book-subtitle">개봉일: ${formatDateOnly(item.releaseDate)}</div>
                             </div>
                             <div class="book-footer">
-                                <div class="book-meta">${item.createdAt ? String(item.createdAt).substring(0, 10) : ''}</div>
+                                <div class="book-meta">${item.createdAt ? formatDateOnly(item.createdAt) : ''}</div>
                                 <div class="book-actions">
                                     ${extraLinksHtml}
                                     <button class="btn-edit" onclick="openEditModal(event, ${item.rowIndex})" title="수정">✏️</button>
@@ -497,7 +506,7 @@
             }
             const filtered = items.filter(item => 
                 (item.title && item.title.toLowerCase().includes(query)) || 
-                (item.releaseDate && item.releaseDate.includes(query))
+                (item.releaseDate && String(item.releaseDate).includes(query))
             );
             renderItems(filtered);
         }
@@ -524,7 +533,7 @@
             document.getElementById('modalTitle').innerText = '프레스킷 정보 수정';
             document.getElementById('editRowIndex').value = rowIndex;
             document.getElementById('bookTitle').value = item.title || '';
-            document.getElementById('releaseDate').value = item.releaseDate || '';
+            document.getElementById('releaseDate').value = item.releaseDate ? formatDateOnly(item.releaseDate) : '';
             document.getElementById('bookUrl').value = item.url || item.bookUrl || item['보도자료URL'] || '';
             document.getElementById('bookUrl2').value = item.url2 || item.bookUrl2 || item['보도자료URL2'] || '';
             document.getElementById('bookUrl3').value = item.url3 || item.bookUrl3 || item['보도자료URL3'] || '';

@@ -45,7 +45,7 @@
             text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
 
-        /* Action & Search Bar Area */
+        /* Action & Search Bar Area: [+] [검색창] [-] */
         .search-container {
             width: 100%;
             max-width: 600px;
@@ -57,29 +57,35 @@
             gap: 8px;
         }
 
-        .btn-add-top {
+        .btn-top-action {
             background: #b8936e;
             color: #ffffff;
             border: 1px solid #a37f59;
             border-radius: 20px;
-            padding: 10px 16px;
-            font-size: 0.95rem;
+            width: 44px;
+            height: 40px;
+            font-size: 1.15rem;
             font-weight: bold;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 4px;
-            white-space: nowrap;
+            justify-content: center;
             box-shadow: 0 2px 5px rgba(0,0,0,0.08);
             transition: background 0.2s, transform 0.1s;
+            flex-shrink: 0;
         }
 
-        .btn-add-top:hover {
+        .btn-top-action:hover {
             background: #a37f59;
         }
 
-        .btn-add-top:active {
-            transform: scale(0.97);
+        .btn-top-action:active {
+            transform: scale(0.95);
+        }
+
+        .btn-top-action.active {
+            background: #706259;
+            border-color: #53473f;
         }
 
         .search-input {
@@ -94,6 +100,7 @@
             outline: none;
             transition: border-color 0.3s, box-shadow 0.3s;
             box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+            height: 40px;
         }
 
         .search-input:focus {
@@ -305,16 +312,28 @@
         .modal-actions {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             margin-top: 22px;
         }
 
+        .left-actions {
+            display: flex;
+            gap: 6px;
+        }
+
         .btn {
-            padding: 9px 18px;
+            padding: 9px 16px;
             border-radius: 6px;
             border: none;
             font-size: 0.85rem;
             cursor: pointer;
             font-weight: bold;
+        }
+
+        .btn-icon-sq {
+            padding: 8px 12px;
+            font-size: 0.95rem;
+            min-width: 38px;
         }
 
         .btn-primary { background: #b8936e; color: #fff; }
@@ -323,6 +342,8 @@
         .btn-secondary:hover { background: #dccbb5; }
         .btn-danger { background: #c94c4c; color: #fff; }
         .btn-danger:hover { background: #b33b3b; }
+        .btn-archive { background: #8c7a6b; color: #fff; }
+        .btn-archive:hover { background: #756557; }
 
         .loading {
             grid-column: span 3;
@@ -351,10 +372,11 @@
         <h1>Press Kit Room</h1>
     </div>
     
-    <!-- Top Action Bar -->
+    <!-- Top Action Bar: [+] [검색창] [-] -->
     <div class="search-container">
-        <button class="btn-add-top" onclick="openAddModal()" title="새 프레스킷 등록">＋ 등록</button>
-        <input type="text" id="searchInput" class="search-input" placeholder="영화/작품 제목 검색..." oninput="filterBooks()">
+        <button class="btn-top-action" onclick="openAddModal()" title="새 프레스킷 등록">＋</button>
+        <input type="text" id="searchInput" class="search-input" placeholder="" oninput="filterBooks()">
+        <button class="btn-top-action" id="btnToggleArchive" onclick="toggleArchiveView()" title="보관함 보기">－</button>
     </div>
 
     <!-- Main List Shelf -->
@@ -370,7 +392,7 @@
             
             <div class="form-group">
                 <label for="bookTitle">제목 (필수)</label>
-                <input type="text" id="bookTitle" placeholder="작품/영화 제목을 입력하세요" required>
+                <input type="text" id="bookTitle" required>
             </div>
             
             <div class="form-group">
@@ -379,23 +401,24 @@
             </div>
             
             <div class="form-group">
-                <label for="bookUrl">보도자료 메인 URL (카드 클릭 이동, 필수)</label>
-                <input type="url" id="bookUrl" placeholder="https://..." required>
+                <label for="bookUrl">보도자료 메인 URL (필수)</label>
+                <input type="url" id="bookUrl" required>
             </div>
 
             <div class="form-group">
-                <label for="bookUrl2">추가 링크 1 (🔗 아이콘 생성)</label>
-                <input type="url" id="bookUrl2" placeholder="https://...">
+                <label for="bookUrl2">추가 링크 1</label>
+                <input type="url" id="bookUrl2">
             </div>
 
             <div class="form-group">
-                <label for="bookUrl3">추가 링크 2 (📎 아이콘 생성)</label>
-                <input type="url" id="bookUrl3" placeholder="https://...">
+                <label for="bookUrl3">추가 링크 2</label>
+                <input type="url" id="bookUrl3">
             </div>
 
             <div class="modal-actions">
-                <div>
-                    <button class="btn btn-danger" id="btnDelete" onclick="deleteBook()" style="display: none;">삭제</button>
+                <div class="left-actions">
+                    <button class="btn btn-danger btn-icon-sq" id="btnDelete" onclick="deleteBook()" style="display: none;" title="삭제">✕</button>
+                    <button class="btn btn-archive btn-icon-sq" id="btnArchive" onclick="toggleArchiveItem()" style="display: none;" title="보관 / 복원">－</button>
                 </div>
                 <div>
                     <button class="btn btn-secondary" onclick="closeModal()">취소</button>
@@ -409,10 +432,24 @@
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxju6NWfrcM4rSGOgscGa8Xr7X0_PGEj7_YVoe2jReJ0a8am_qvJgp-ClZTEC-vvqU3/exec"; 
                                        
         let items = []; 
+        let isArchiveView = false;
+        const ARCHIVE_KEY = 'presskit_archived_rows';
+        
         const bookshelf = document.getElementById('bookshelf');
         const modal = document.getElementById('modal');
 
-        // URL 유효성 검사 헬퍼 함수
+        function getArchivedList() {
+            try {
+                return JSON.parse(localStorage.getItem(ARCHIVE_KEY)) || [];
+            } catch(e) {
+                return [];
+            }
+        }
+
+        function setArchivedList(list) {
+            localStorage.setItem(ARCHIVE_KEY, JSON.stringify(list));
+        }
+
         function getValidUrl(val) {
             if (!val) return null;
             const str = String(val).trim();
@@ -420,14 +457,25 @@
             return str;
         }
 
-        // 📌 날짜 뒤의 불필요한 ISO 시간 규격(T15:00:00.000Z 등) 제거 헬퍼
+        // 📌 한국 표준시(KST) 기준 날짜 추출
         function formatDateOnly(val) {
             if (!val) return '미정';
-            const str = String(val).trim();
-            if (str.includes('T')) {
-                return str.split('T')[0];
+            const d = new Date(val);
+            if (isNaN(d.getTime())) {
+                return String(val).split('T')[0].substring(0, 10);
             }
-            return str.substring(0, 10);
+            // 한국 시간대 기준 YYYY-MM-DD 변환
+            const parts = new Intl.DateTimeFormat('ko-KR', {
+                timeZone: 'Asia/Seoul',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            }).formatToParts(d);
+            
+            const year = parts.find(p => p.type === 'year').value;
+            const month = parts.find(p => p.type === 'month').value;
+            const day = parts.find(p => p.type === 'day').value;
+            return `${year}-${month}-${day}`;
         }
 
         async function fetchItems() {
@@ -438,31 +486,65 @@
                 
                 let rawData = await response.json();
                 
-                // 최신순 정렬
                 items = rawData.sort((a, b) => {
                     const dateA = a.releaseDate ? new Date(a.releaseDate) : new Date(0);
                     const dateB = b.releaseDate ? new Date(b.releaseDate) : new Date(0);
                     return dateB - dateA;
                 });
 
-                renderItems(items);
+                filterBooks();
             } catch (error) {
                 console.error("데이터 가져오기 실패:", error);
                 bookshelf.innerHTML = '<div class="loading" style="color:#b33b3b;">목록을 불러오지 못했습니다.<br>API 주소 및 앱 스크립트 배포 권한을 확인해주세요.</div>';
             }
         }
 
+        function toggleArchiveView() {
+            isArchiveView = !isArchiveView;
+            const btn = document.getElementById('btnToggleArchive');
+            if (isArchiveView) {
+                btn.classList.add('active');
+                btn.title = "메인 목록으로 돌아가기";
+            } else {
+                btn.classList.remove('active');
+                btn.title = "보관함 보기";
+            }
+            filterBooks();
+        }
+
+        function filterBooks() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            const archivedRows = getArchivedList();
+
+            // 보관함 모드 vs 활성 목록 모드 분리
+            let targetList = items.filter(item => {
+                const isArchived = archivedRows.includes(Number(item.rowIndex));
+                return isArchiveView ? isArchived : !isArchived;
+            });
+
+            if (query) {
+                targetList = targetList.filter(item => 
+                    (item.title && item.title.toLowerCase().includes(query)) || 
+                    (item.releaseDate && String(item.releaseDate).includes(query))
+                );
+            }
+
+            renderItems(targetList);
+        }
+
         function renderItems(dataList) {
             bookshelf.innerHTML = '';
+
+            if (dataList.length === 0) {
+                bookshelf.innerHTML = `<div class="loading">${isArchiveView ? '보관된 프레스킷이 없습니다.' : '표시할 프레스킷이 없습니다.'}</div>`;
+                return;
+            }
 
             dataList.forEach((item, index) => {
                 const colorIndex = index % 4;
                 const colorClass = `color-${colorIndex}`;
 
-                // 메인 URL (카드 전체 클릭용)
                 const mainUrl = getValidUrl(item.url || item.bookUrl || item['보도자료URL'] || '#');
-
-                // 추가 URL 1 & 2 (하단 아이콘 버튼용)
                 const url2 = getValidUrl(item.url2 || item.bookUrl2 || item['보도자료URL2']);
                 const url3 = getValidUrl(item.url3 || item.bookUrl3 || item['보도자료URL3']);
 
@@ -498,19 +580,6 @@
             });
         }
 
-        function filterBooks() {
-            const query = document.getElementById('searchInput').value.toLowerCase().trim();
-            if (!query) {
-                renderItems(items);
-                return;
-            }
-            const filtered = items.filter(item => 
-                (item.title && item.title.toLowerCase().includes(query)) || 
-                (item.releaseDate && String(item.releaseDate).includes(query))
-            );
-            renderItems(filtered);
-        }
-
         function openAddModal() {
             document.getElementById('modalTitle').innerText = '새 프레스킷 등록';
             document.getElementById('editRowIndex').value = '';
@@ -520,6 +589,7 @@
             document.getElementById('bookUrl2').value = '';
             document.getElementById('bookUrl3').value = '';
             document.getElementById('btnDelete').style.display = 'none';
+            document.getElementById('btnArchive').style.display = 'none';
             modal.style.display = 'flex';
         }
 
@@ -530,6 +600,9 @@
             const item = items.find(n => Number(n.rowIndex) === Number(rowIndex));
             if (!item) return;
 
+            const archivedRows = getArchivedList();
+            const isArchived = archivedRows.includes(Number(rowIndex));
+
             document.getElementById('modalTitle').innerText = '프레스킷 정보 수정';
             document.getElementById('editRowIndex').value = rowIndex;
             document.getElementById('bookTitle').value = item.title || '';
@@ -537,8 +610,32 @@
             document.getElementById('bookUrl').value = item.url || item.bookUrl || item['보도자료URL'] || '';
             document.getElementById('bookUrl2').value = item.url2 || item.bookUrl2 || item['보도자료URL2'] || '';
             document.getElementById('bookUrl3').value = item.url3 || item.bookUrl3 || item['보도자료URL3'] || '';
+            
             document.getElementById('btnDelete').style.display = 'inline-block';
+            
+            const btnArchive = document.getElementById('btnArchive');
+            btnArchive.style.display = 'inline-block';
+            btnArchive.innerText = isArchived ? '＋' : '－';
+            btnArchive.title = isArchived ? '메인으로 복원' : '보관함으로 이동';
+
             modal.style.display = 'flex';
+        }
+
+        function toggleArchiveItem() {
+            const rowIndex = Number(document.getElementById('editRowIndex').value);
+            if (!rowIndex) return;
+
+            let archived = getArchivedList();
+            if (archived.includes(rowIndex)) {
+                archived = archived.filter(id => id !== rowIndex);
+                alert('메인 목록으로 복원되었습니다.');
+            } else {
+                archived.push(rowIndex);
+                alert('보관함으로 이동되었습니다.');
+            }
+            setArchivedList(archived);
+            closeModal();
+            filterBooks();
         }
 
         function closeModal() {
@@ -610,7 +707,7 @@
 
         async function deleteBook() {
             const rowIndex = document.getElementById('editRowIndex').value;
-            if (rowIndex !== '' && confirm('이 항목을 삭제하시겠습니까?')) {
+            if (rowIndex !== '' && confirm('이 항목을 영구 삭제하시겠습니까?')) {
                 try {
                     const response = await fetch(WEB_APP_URL, {
                         method: 'POST',
@@ -623,6 +720,11 @@
                     });
                     const resData = await response.json();
                     if (resData.result === 'success') {
+                        // 보관 리스트에서도 제거
+                        let archived = getArchivedList();
+                        archived = archived.filter(id => id !== Number(rowIndex));
+                        setArchivedList(archived);
+
                         alert('삭제되었습니다.');
                         closeModal();
                         fetchItems();
